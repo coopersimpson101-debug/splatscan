@@ -1,0 +1,33 @@
+# systemd unit for the splatscan live scanner on a Jetson.  STATUS: NOT VALIDATED ON HARDWARE.
+# Install:  sudo cp splatscan.service /etc/systemd/system/ && sudo systemctl daemon-reload
+#           sudo systemctl enable --now splatscan
+[Unit]
+Description=splatscan live 3D scanner (insight-vio + online Gaussian splatting + WebSocket stream)
+After=network-online.target nvargus-daemon.service
+Wants=network-online.target
+Requires=nvargus-daemon.service
+
+[Service]
+Type=simple
+User=splatscan
+Group=splatscan
+# SPI (IMU) and the Argus camera daemon
+SupplementaryGroups=gpio i2c video
+WorkingDirectory=/opt/splatscan
+Environment=PYTHONUNBUFFERED=1
+Environment=OMP_NUM_THREADS=2
+ExecStartPre=/usr/bin/test -e /dev/spidev0.0
+ExecStart=/opt/splatscan/venv/bin/python scripts/run_device.py --config /etc/splatscan/splatscan.yaml
+Restart=on-failure
+RestartSec=3
+# keep the scanner responsive: realtime-ish priority for the IMU thread lives in the process
+Nice=-5
+LimitMEMLOCK=infinity
+StateDirectory=splatscan
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

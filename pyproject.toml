@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "splatscan"
+version = "0.1.0"
+description = "Live 3D scanning: insight-vio poses + an online Gaussian-splatting optimiser with a hand-written differentiable rasteriser, streamed over WebSocket to splatweb"
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "the splatscan authors" }]
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "torch>=2.1",
+  "pyyaml>=6",
+  "insight-vio @ git+https://github.com/coopersimpson101-debug/insight-vio",
+]
+keywords = ["gaussian-splatting", "slam", "visual-inertial-odometry", "3d-scanning", "webgpu", "pytorch"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Image Processing",
+  "Topic :: Multimedia :: Graphics :: 3D Modeling",
+]
+
+[project.optional-dependencies]
+figures = ["matplotlib>=3.7", "pillow>=10"]
+dev = ["pytest>=7", "pillow>=10"]
+
+[project.urls]
+Homepage = "https://github.com/coopersimpson101-debug/splatscan"
+Repository = "https://github.com/coopersimpson101-debug/splatscan"
+Issues = "https://github.com/coopersimpson101-debug/splatscan/issues"
+Changelog = "https://github.com/coopersimpson101-debug/splatscan/blob/main/CHANGELOG.md"
+
+[project.scripts]
+splatscan-record = "splatscan.record:main"
+splatscan-serve = "splatscan.server:main"
+
+[tool.setuptools.packages.find]
+include = ["splatscan*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-p no:cacheprovider"

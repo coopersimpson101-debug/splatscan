@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: pytest (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python: ["3.10", "3.12"]
+        include:
+          - os: macos-latest
+            python: "3.12"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install PyTorch (CPU build)
+        run: pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Install splatscan + insight-vio (from GitHub) + test deps
+        run: pip install -e ".[dev,figures]"
+      # The CUDA comparison test skips itself on runners without a GPU.
+      - name: Tests (gradients, mapper, VIO hookup, protocol, server, deploy files)
+        env:
+          OMP_NUM_THREADS: "2"
+        run: python -m pytest -q
+      - name: Protocol fixture is reproducible
+        run: |
+          python scripts/make_protocol_fixture.py --out /tmp/fx
+          python - <<'PY'
+          from splatscan import protocol as P
+          msgs = list(P.read_log("/tmp/fx/splatscan_v1.sslog"))
+          assert len(msgs) == 7, len(msgs)
+          print("fixture OK:", len(msgs), "messages")
+          PY
+      - name: Device wiring dry run
+        run: python scripts/run_device.py --config deploy/jetson/splatscan.yaml --dry-run
+      - name: Short end-to-end scan (VIO on rendered images -> mapper -> stream log)
+        if: matrix.os == 'ubuntu-latest' && matrix.python == '3.12'
+        run: |
+          python scripts/run_scan.py --live --duration 2 --max-frames 30 --iters 5 --first-iters 10 --out /tmp/scan --no-frames
+          python -m splatscan.server --help > /dev/null

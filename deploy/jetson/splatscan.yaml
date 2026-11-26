@@ -1,0 +1,42 @@
+# splatscan on a Jetson Orin Nano - device configuration.  STATUS: NOT VALIDATED ON HARDWARE.
+# !!! Every calibration value here is a PLACEHOLDER - calibrate with Kalibr (insight-vio docs/calibration.md) !!!
+
+# Tracking: insight-vio's own config for the stereo OV9281 pair + ICM-42688-P (copy and calibrate
+# insight-vio/configs/jetson_orin_icm42688.yaml).
+vio_config: /etc/splatscan/vio.yaml
+imu_rate_hz: 400
+
+# Colour camera for the splat map (e.g. IMX219/IMX477 on CSI port 2, or set a USB pipeline).
+rgb:
+  sensor_id: 2
+  resolution: [640, 480]
+  fps: 15
+  intrinsics: [500.0, 500.0, 319.5, 239.5]   # PLACEHOLDER fx fy cx cy (pixels, undistorted)
+  map_downsample: 2                           # mapper works at 320x240
+  T_imu_rgb:                                  # PLACEHOLDER camera -> IMU (body) transform
+    - [0.0, 0.0, 1.0, 0.03]
+    - [-1.0, 0.0, 0.0, 0.0]
+    - [0.0, -1.0, 0.0, -0.02]
+    - [0.0, 0.0, 0.0, 1.0]
+
+# Depth for splat initialisation:
+#   stereo_features - sparse, triangulated from insight-vio's stereo matches (no extra sensor)
+#   sensor          - a depth camera registered to the RGB image (driver not included)
+depth:
+  mode: stereo_features
+
+mapper:
+  device: cuda          # Orin GPU via PyTorch for JetPack
+  sh_degree: 1
+  tile: 8
+  kf_trans: 0.20
+  kf_rot_deg: 12
+  window: 8
+  iters_per_kf: 20
+  add_stride: 1         # sparse depth: use every triangulated feature
+  sigma_scale: 2.0      # sparse seeds must cover more area
+
+stream:
+  host: 0.0.0.0         # LAN viewers: splatweb ?live=ws://10.0.0.42:8765
+  port: 8765
+  log: /var/lib/splatscan/session.sslog

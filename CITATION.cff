@@ -1,0 +1,42 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "splatscan: live 3D scanning with visual-inertial odometry and online Gaussian splatting"
+authors:
+  - name: "the splatscan authors"
+version: 0.1.0
+date-released: 2026-11-26
+license: MIT
+repository-code: "https://github.com/coopersimpson101-debug/splatscan"
+keywords:
+  - gaussian splatting
+  - SLAM
+  - visual-inertial odometry
+  - 3D scanning
+references:
+  - type: article
+    title: "3D Gaussian Splatting for Real-Time Radiance Field Rendering"
+    authors:
+      - family-names: Kerbl
+        given-names: Bernhard
+      - family-names: Kopanas
+        given-names: Georgios
+      - family-names: Leimkühler
+        given-names: Thomas
+      - family-names: Drettakis
+        given-names: George
+    journal: "ACM Transactions on Graphics"
+    year: 2023
+  - type: conference-paper
+    title: "SplaTAM: Splat, Track & Map 3D Gaussians for Dense RGB-D SLAM"
+    authors:
+      - family-names: Keetha
+        given-names: Nikhil
+    collection-title: "Proceedings of CVPR"
+    year: 2024
+  - type: conference-paper
+    title: "Gaussian Splatting SLAM"
+    authors:
+      - family-names: Matsuki
+        given-names: Hidenobu
+    collection-title: "Proceedings of CVPR"
+    year: 2024
